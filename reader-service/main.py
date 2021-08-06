@@ -1,7 +1,8 @@
 import serial, board
 from adafruit_pn532.uart import PN532_UART
 
-pn532 = PN532_UART(serial.Serial('/dev/ttyS0', baudrate=115200, timeout=100))
+uart = serial.Serial('/dev/ttyS0', baudrate=115200, timeout=10)
+pn532 = PN532_UART(uart, debug=True)
 
 pn532.SAM_configuration()
 
@@ -16,3 +17,5 @@ try:
         print('Found card with UID:', '-'.join([hex(i) for i in uid]))
 except KeyboardInterrupt:
     pn532.power_down()
+finally:
+    uart.close()
