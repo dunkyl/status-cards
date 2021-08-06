@@ -21,6 +21,11 @@ STATUSES: dict[int, tuple[int, int]] = {
     Status.Invisible: (x, 576)
 }
 
+CARDS = {
+    '3a-ff-3b-98': Status.Online,
+    '23-49-81-52': Status.Invisible
+}
+
 async def set_status(status):
     # find the discord application
     apps = list(ahk.windows())
@@ -77,7 +82,7 @@ async def main():
         msg = await ws.recv()
         print(F'New card: {msg}')
 
-        newstatus = Status.Invisible
+        newstatus = CARDS.get(msg, Status.Unknown)
 
         if isFirstChange:
             pass

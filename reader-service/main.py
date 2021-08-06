@@ -32,7 +32,7 @@ async def card_read_loop():
         
 async def handle_connection(ws: WebSocketServerProtocol, _path: str):
     global reader_task
-    if reader_task is None:
+    if reader_task is None or reader_task.done():
         print('New connection: Starting reading task.')
         reader_task = asyncio.create_task(card_read_loop())
     connections.append(ws)
