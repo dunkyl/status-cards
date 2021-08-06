@@ -5,13 +5,12 @@ from websockets.server import serve as ws_serve, WebSocketServerProtocol
 
 pool = ThreadPoolExecutor()
 
-loop = asyncio.get_event_loop()
-
 connections: list[WebSocketServerProtocol] = []
 reader_task = None
 
 async def card_read(pn532):
-    return await loop.run_in_executor(pool, pn532.read_passive_target)
+    asyncio.run
+    return await asyncio.get_event_loop().run_in_executor(pool, pn532.read_passive_target)
 
 async def card_read_loop():
     try:
@@ -48,3 +47,5 @@ async def main():
     ws = await ws_serve(handle_connection, 'octopi', 10022)
     print('Started server.')
     await ws.wait_closed()
+
+asyncio.run(main())
