@@ -9,11 +9,10 @@ ic, ver, rev, support = pn532.firmware_version
 print(F"{ver}.{rev}")
 try:
     while True:
-
-            uid = pn532.read_passive_target(timeout=0.5)
-            print('.', end="")
-            if uid is None:
-                continue
-            print('Found card with UID:', '-'.join([hex(i) for i in uid]))
+        uid = pn532.read_passive_target()
+        print('.', end="")
+        if uid is None:
+            continue
+        print('Found card with UID:', '-'.join([hex(i) for i in uid]))
 except KeyboardInterrupt:
     pn532.power_down()
