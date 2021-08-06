@@ -57,7 +57,8 @@ async def set_status(status):
     dposx, dposy, dsizx, dsizy = discordApp.rect
 
     # change status as appropriate
-    ahk.mouse_move(*STATUS_BTN, speed=2, relative=False, mode='Window', blocking=True)
+    x, y = STATUS_BTN
+    ahk.mouse_move(x, dsizy-y, speed=2, relative=False, mode='Window', blocking=True)
     await asyncio.sleep(0.1)
     ahk.click()
     await asyncio.sleep(0.2)

@@ -30,7 +30,7 @@ async def card_read_loop():
         # uart.close()
         raise e
     finally:
-        pn532.power_down()
+        #pn532.power_down()
         uart.close()
         
 async def handle_connection(ws: WebSocketServerProtocol, _path: str):
