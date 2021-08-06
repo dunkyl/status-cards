@@ -1,10 +1,7 @@
 import serial, board
 from adafruit_pn532.uart import PN532_UART
 
-uart = serial.Serial('/dev/ttyS0')
-uart.baudrate = 9600
-
-pn532 = PN532_UART(uart)
+pn532 = PN532_UART(serial.Serial('/dev/ttyS0', baudrate=115200))
 
 pn532.SAM_configuration()
 
