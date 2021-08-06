@@ -4,21 +4,23 @@ from ahk import AHK
 
 ahk = AHK()
 
-UPDATE_YOFF = 30 # -20
+D_X = 95
+STATUS_BTN = (D_X, 24)
 
-x = 90
 class Status:
     Unknown = -1
     Online = 0
     Away = 1
     DND = 2
     Invisible = 3
+    Custom = 4
 
 STATUSES: dict[int, tuple[int, int]] = {
-    Status.Online:    (x, 451),
-    Status.Away:      (x, 483),
-    Status.DND:       (x, 518),
-    Status.Invisible: (x, 576)
+    Status.Online:    (D_X, 346),
+    Status.Away:      (D_X, 284),
+    Status.DND:       (D_X, 222),
+    Status.Invisible: (D_X, 160),
+    Status.Custom:    (D_X, 74)
 }
 
 CARDS = {
@@ -54,14 +56,13 @@ async def set_status(status):
 
     dposx, dposy, dsizx, dsizy = discordApp.rect
 
-    dsizy += UPDATE_YOFF
-
     # change status as appropriate
-    ahk.mouse_move(x, 892-920+dsizy-UPDATE_YOFF, speed=2, relative=False, mode='Window', blocking=True)
+    ahk.mouse_move(*STATUS_BTN, speed=2, relative=False, mode='Window', blocking=True)
     await asyncio.sleep(0.1)
     ahk.click()
     await asyncio.sleep(0.2)
-    ahk.mouse_move( *(STATUSES[status]), speed=2, relative=False, mode='Window', blocking=True)
+    x, y = STATUSES[status]
+    ahk.mouse_move(x, dsizy-y, speed=2, relative=False, mode='Window', blocking=True)
     await asyncio.sleep(0.2)
     ahk.click()
 
@@ -75,7 +76,6 @@ async def main():
     ws = await connect('ws://192.168.12.247:10022')
     print('connected')
 
-    isFirstChange = True
     lastStatus = Status.Unknown
 
     while not ws.closed:
@@ -84,10 +84,7 @@ async def main():
 
         newstatus = CARDS.get(msg, Status.Unknown)
 
-        if isFirstChange:
-            pass
-            isFirstChange = False
-        elif newstatus != lastStatus:
+        if newstatus != lastStatus:
             await set_status(newstatus)
 
         lastStatus = newstatus

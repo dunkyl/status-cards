@@ -26,9 +26,12 @@ async def card_read_loop():
             for ws in list(connections):
                 await ws.send(uid_str)
     except (KeyboardInterrupt, asyncio.CancelledError) as e:
+        # pn532.power_down()
+        # uart.close()
+        raise e
+    finally:
         pn532.power_down()
         uart.close()
-        raise e
         
 async def handle_connection(ws: WebSocketServerProtocol, _path: str):
     global reader_task
