@@ -16,8 +16,8 @@ class Status:
     Custom = 4
 
 STATUSES: dict[int, tuple[int, int]] = {
-    Status.Online:    (D_X, 346),
-    Status.Away:      (D_X, 284),
+    Status.Online:    (D_X, 281),
+    Status.Away:      (D_X, 253),
     Status.DND:       (D_X, 222),
     Status.Invisible: (D_X, 160),
     Status.Custom:    (D_X, 74)
