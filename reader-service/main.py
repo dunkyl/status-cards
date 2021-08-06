@@ -21,10 +21,10 @@ async def card_read_loop():
             uid = await card_read(pn532)
             if not uid:
                 continue
-            uid_str = '-'.join(hex(i) for i in uid)
+            uid_str = '-'.join(hex(i)[2:] for i in uid)
             print(F"Card: {uid_str}")
             for ws in list(connections):
-                ws.send(uid_str)
+                await ws.send(uid_str)
     except (KeyboardInterrupt, asyncio.CancelledError) as e:
         pn532.power_down()
         uart.close()
