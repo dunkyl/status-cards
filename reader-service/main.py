@@ -30,7 +30,7 @@ async def card_read_loop():
         uart.close()
         raise e
         
-async def handle_connection(ws: WebSocketServerProtocol):
+async def handle_connection(ws: WebSocketServerProtocol, _path: str):
     global reader_task
     if reader_task is None:
         print('New connection: Starting reading task.')
