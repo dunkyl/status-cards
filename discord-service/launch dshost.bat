@@ -1,0 +1,1 @@
+wt python310 "C:\Users\dunkyl\OneDrive\Code\Desk Switch\host.py"
