@@ -44,7 +44,7 @@ async def handle_connection(ws: WebSocketServerProtocol):
 
 async def main():
     
-    ws = await ws_serve(handle_connection, 'octopi', 10022)
+    ws = await ws_serve(handle_connection, '192.168.12.247', 10022)
     print('Started server.')
     await ws.wait_closed()
 

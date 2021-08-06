@@ -67,7 +67,7 @@ async def set_status(status):
         
 
 async def main():
-    ws = await connect('ws://octopi:10022')
+    ws = await connect('ws://192.168.12.247:10022')
     print('connected')
 
     isFirstChange = True
