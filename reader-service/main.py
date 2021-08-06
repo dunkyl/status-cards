@@ -1,7 +1,10 @@
-import busio, board
+import serial, board
 from adafruit_pn532.uart import PN532_UART
 
-pn532 = PN532_UART(busio.UART(board.TXD, board.RXD))
+uart = serial.Serial('/dev/ttyS0')
+uart.baudrate = 9600
+
+pn532 = PN532_UART(uart)
 
 pn532.SAM_configuration()
 
