@@ -1,6 +1,8 @@
 import serial, asyncio
 from concurrent.futures import ThreadPoolExecutor
 from adafruit_pn532.uart import PN532_UART
+import board
+import digitalio
 from websockets.server import serve as ws_serve, WebSocketServerProtocol
 from functools import partial
 
@@ -50,6 +52,14 @@ async def main():
     
     ws = await ws_serve(handle_connection, '192.168.12.247', 10022)
     print('Started server.')
+
+    led = digitalio.DigitalInOut(board.D17)
+    led.direction = digitalio.Direction.OUTPUT
+
+    while True:
+        led.value = not led.value
+        await asyncio.sleep(1)
+        
     await ws.wait_closed()
 
 asyncio.run(main())
