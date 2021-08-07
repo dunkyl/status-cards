@@ -19,10 +19,15 @@ def dout(pin):
 status_led = dout(board.D17)
 status_led.value = 0
 
-async def card_read(pn532):
+async def blink():
     status_led.value = 1
-    uid = await asyncio.get_event_loop().run_in_executor(pool, partial(pn532.read_passive_target, timeout=0.5))
+    await asyncio.sleep(0.25)
     status_led.value = 0
+
+async def card_read(pn532):
+    #status_led.value = 1
+    uid = await asyncio.get_event_loop().run_in_executor(pool, partial(pn532.read_passive_target, timeout=0.5))
+    #status_led.value = 0
     return uid
 
 async def card_read_loop():
@@ -34,10 +39,12 @@ async def card_read_loop():
             uid = await card_read(pn532)
             if not uid:
                 continue
+            status_led.value = 1
             uid_str = '-'.join(hex(i)[2:] for i in uid)
             print(F"Card: {uid_str}")
             for ws in list(connections):
                 await ws.send(uid_str)
+            status_led.value = 0
     except (KeyboardInterrupt, asyncio.CancelledError) as e:
         # pn532.power_down()
         # uart.close()
