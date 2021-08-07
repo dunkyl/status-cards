@@ -11,9 +11,18 @@ pool = ThreadPoolExecutor()
 connections: list[WebSocketServerProtocol] = []
 reader_task = None
 
+def dout(pin):
+    p = digitalio.DigitalInOut(pin)
+    p.direction = digitalio.Direction.OUTPUT
+
+status_led = dout(board.D17)
+status_led.value = 0
+
 async def card_read(pn532):
-    asyncio.run
-    return await asyncio.get_event_loop().run_in_executor(pool, partial(pn532.read_passive_target, timeout=0.5))
+    status_led.value = 1
+    uid = await asyncio.get_event_loop().run_in_executor(pool, partial(pn532.read_passive_target, timeout=0.5))
+    status_led.value = 0
+    return uid
 
 async def card_read_loop():
     try:
@@ -48,18 +57,20 @@ async def handle_connection(ws: WebSocketServerProtocol, _path: str):
         print('No more connections: Stopping reading task.')
         reader_task.cancel()
 
+
+
 async def main():
     
     ws = await ws_serve(handle_connection, '192.168.12.247', 10022)
     print('Started server.')
 
-    led = digitalio.DigitalInOut(board.D17)
-    led.direction = digitalio.Direction.OUTPUT
+    
+    # 16, 19, 20, 21, 26
 
-    while True:
-        led.value = not led.value
-        await asyncio.sleep(1)
-        
+    # while True:
+    #     led.value = not led.value
+    #     await asyncio.sleep(1)
+
     await ws.wait_closed()
 
 asyncio.run(main())
