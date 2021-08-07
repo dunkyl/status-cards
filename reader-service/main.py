@@ -2,6 +2,7 @@ import serial, asyncio
 from concurrent.futures import ThreadPoolExecutor
 from adafruit_pn532.uart import PN532_UART
 from websockets.server import serve as ws_serve, WebSocketServerProtocol
+from functools import partial
 
 pool = ThreadPoolExecutor()
 
@@ -10,7 +11,7 @@ reader_task = None
 
 async def card_read(pn532):
     asyncio.run
-    return await asyncio.get_event_loop().run_in_executor(pool, pn532.read_passive_target)
+    return await asyncio.get_event_loop().run_in_executor(pool, partial(pn532.read_passive_target, timeout=0.5))
 
 async def card_read_loop():
     try:

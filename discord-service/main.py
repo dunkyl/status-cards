@@ -1,4 +1,5 @@
 import asyncio
+from re import S
 from websockets.client import connect, WebSocketClientProtocol
 from ahk import AHK
 
@@ -24,8 +25,10 @@ STATUSES: dict[int, tuple[int, int]] = {
 }
 
 CARDS = {
-    '3a-ff-3b-98': Status.Online,
-    '23-49-81-52': Status.Invisible
+    '8a-f6-3d-98': Status.Online,
+    '23-49-81-52': Status.Away,
+    '3a-ff-3b-98': Status.DND,
+    'fa-7f-3c-98': Status.Invisible
 }
 
 async def set_status(status):
