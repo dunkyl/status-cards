@@ -14,6 +14,7 @@ reader_task = None
 def dout(pin):
     p = digitalio.DigitalInOut(pin)
     p.direction = digitalio.Direction.OUTPUT
+    return p
 
 status_led = dout(board.D17)
 status_led.value = 0
