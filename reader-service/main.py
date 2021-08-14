@@ -40,7 +40,7 @@ LEDS = {
     'p': dout(board.D16),
     'b': dout(board.D12),
 }
-LEDS_I = list(LEDS.items())
+LEDS_I = list(LEDS.values())
 
 async def clear_leds_to(x):
     for i in range(len(LEDS_I)):
