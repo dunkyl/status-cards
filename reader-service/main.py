@@ -1,6 +1,7 @@
 import serial, asyncio
 from concurrent.futures import ThreadPoolExecutor
 from adafruit_pn532.uart import PN532_UART
+import traceback
 import board
 import digitalio
 from websockets.server import serve as ws_serve, WebSocketServerProtocol
@@ -32,19 +33,26 @@ async def card_read(pn532):
 
 async def card_read_loop():
     try:
-        uart = serial.Serial('/dev/ttyS0', baudrate=115200, timeout=1)
-        pn532 = PN532_UART(uart, debug=False)
-        pn532.SAM_configuration()
-        while connections:
-            uid = await card_read(pn532)
-            if not uid:
-                continue
-            status_led.value = 1
-            uid_str = '-'.join(hex(i)[2:] for i in uid)
-            print(F"Card: {uid_str}")
-            for ws in list(connections):
-                await ws.send(uid_str)
-            status_led.value = 0
+        while True:
+            try:
+                uart = serial.Serial('/dev/ttyS0', baudrate=115200, timeout=1)
+                pn532 = PN532_UART(uart, debug=False)
+                pn532.SAM_configuration()
+                while connections:
+                    uid = await card_read(pn532)
+                    if not uid:
+                        continue
+                    status_led.value = 1
+                    uid_str = '-'.join(hex(i)[2:] for i in uid)
+                    print(F"Card: {uid_str}")
+                    for ws in list(connections):
+                        await ws.send(uid_str)
+                    status_led.value = 0
+            except RuntimeError as e:
+                uart.close()
+                await asyncio.sleep(1)
+                print(F"Error: {e}")
+                print(traceback.format_exc().replace('\n', '\n     '))
     except (KeyboardInterrupt, asyncio.CancelledError) as e:
         # pn532.power_down()
         # uart.close()
