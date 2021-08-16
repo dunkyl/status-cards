@@ -1,5 +1,5 @@
 import asyncio
-from re import S
+from websockets.exceptions import ConnectionClosedError
 from websockets.client import connect, WebSocketClientProtocol
 from ahk import AHK
 
@@ -77,23 +77,28 @@ async def set_status(status):
         
 
 async def main():
-    ws = await connect('ws://192.168.12.247:10022')
-    print('connected')
+    while True:
+        try:
+            ws = await connect('ws://192.168.12.247:10022')
+            print('connected')
 
-    lastStatus = Status.Unknown
+            lastStatus = Status.Unknown
 
-    while not ws.closed:
-        msg = await ws.recv()
-        print(F'New card: {msg}')
+            while not ws.closed:
+                msg = await ws.recv()
+                print(F'New card: {msg}')
 
-        newstatus = CARDS.get(msg, Status.Unknown)
+                newstatus = CARDS.get(msg, Status.Unknown)
 
-        if newstatus != lastStatus:
-            await set_status(newstatus)
+                if newstatus != lastStatus:
+                    await set_status(newstatus)
 
-        lastStatus = newstatus
+                lastStatus = newstatus
 
-    print('disconnected')
+            print('disconnected')
+        except ConnectionClosedError:
+            print('disconnected: closed?')
+        await asyncio.sleep(10)
 
 asyncio.run(main())
 
