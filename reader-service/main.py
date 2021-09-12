@@ -6,6 +6,11 @@ import board
 import digitalio
 from websockets.server import serve as ws_serve, WebSocketServerProtocol
 from functools import partial
+import socket
+
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(('8.8.8.8', 1))
+local_ip = s.getsockname()[0]
 
 pool = ThreadPoolExecutor()
 
@@ -108,7 +113,7 @@ async def handle_connection(ws: WebSocketServerProtocol, _path: str):
 
 async def main():
     
-    ws = await ws_serve(handle_connection, '192.168.12.247', 10022)
+    ws = await ws_serve(handle_connection, local_ip, 10022)
     print('Started server.')
 
     

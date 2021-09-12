@@ -1,1 +1,1 @@
-wt python310 "C:\Users\dunkyl\OneDrive\Code\Desk Switch\host.py"
+wt python39 "C:\Users\dunkyl\source\repos\status-cards\discord-service\main.py"
