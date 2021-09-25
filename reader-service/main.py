@@ -82,8 +82,11 @@ async def card_read_loop():
                     for ws in list(connections):
                         await ws.send(uid_str)
                     await blink()
-                    status = CARDS[uid_str]
-                    await clear_leds_to(status)
+                    status = CARDS.get(uid_str, None)
+                    if status:
+                        await clear_leds_to(status)
+                    else:
+                        pass
             except RuntimeError as e:
                 uart.close()
                 await asyncio.sleep(1)
