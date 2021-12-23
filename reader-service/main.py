@@ -83,7 +83,7 @@ async def card_read_loop():
                         await ws.send(uid_str)
                     await blink()
                     status = CARDS.get(uid_str, None)
-                    if status:
+                    if status is not None:
                         await clear_leds_to(status)
                     else:
                         pass
