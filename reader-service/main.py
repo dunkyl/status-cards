@@ -39,7 +39,7 @@ def dout(pin, value=0):
     return p
 
 LEDS = {
-    'g': dout(board.D27),
+    'g': dout(board.D6),
     'w': dout(board.D17),
     'r': dout(board.D22),
     'p': dout(board.D16),
