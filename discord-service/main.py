@@ -6,6 +6,7 @@ from ahk import AHK
 ahk = AHK()
 
 D_X = 95
+D_Y = -8
 STATUS_BTN = (D_X, 24)
 
 class Status:
@@ -17,11 +18,11 @@ class Status:
     Custom = 4
 
 STATUSES: dict[int, tuple[int, int]] = {
-    Status.Online:    (D_X, 281),
-    Status.Away:      (D_X, 253),
-    Status.DND:       (D_X, 222),
-    Status.Invisible: (D_X, 160),
-    Status.Custom:    (D_X, 74)
+    Status.Online:    (D_X, 281+D_Y),
+    Status.Away:      (D_X, 253+D_Y),
+    Status.DND:       (D_X, 222+D_Y),
+    Status.Invisible: (D_X, 160+D_Y),
+    Status.Custom:    (D_X, 74+D_Y)
 }
 
 CARDS = {
