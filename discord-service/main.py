@@ -6,7 +6,7 @@ from ahk import AHK
 ahk = AHK()
 
 D_X = 95
-D_Y = -8
+D_Y = 36
 STATUS_BTN = (D_X, 24)
 
 class Status:
@@ -101,7 +101,7 @@ async def main():
             print('disconnected: closed?')
         except ConnectionRefusedError:
             print('disconnected: refused?')
-        await asyncio.sleep(10)
+        await asyncio.sleep(3)
 
 asyncio.run(main())
 
