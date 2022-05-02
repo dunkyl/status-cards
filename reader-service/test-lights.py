@@ -3,7 +3,6 @@ from concurrent.futures import ThreadPoolExecutor
 import traceback
 import board
 import digitalio
-from sqlalchemy import true
 
 def dout(pin, value=0):
     p = digitalio.DigitalInOut(pin)
