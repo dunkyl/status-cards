@@ -99,6 +99,8 @@ async def main():
             print('disconnected')
         except ConnectionClosedError:
             print('disconnected: closed?')
+        except ConnectionRefusedError:
+            print('disconnected: refused?')
         await asyncio.sleep(10)
 
 asyncio.run(main())
