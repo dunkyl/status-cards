@@ -80,7 +80,7 @@ async def set_status(status):
 async def main():
     while True:
         try:
-            ws = await connect('ws://octopi:10022')
+            ws = await connect('ws://pincoya.lan:10022')
             print('connected')
 
             lastStatus = Status.Unknown
