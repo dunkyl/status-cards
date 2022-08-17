@@ -7,7 +7,6 @@ ahk = AHK()
 
 D_X = 95
 D_Y = 36
-STATUS_BTN = (D_X, 24)
 
 class Status:
     Unknown = -1
@@ -15,14 +14,12 @@ class Status:
     Away = 1
     DND = 2
     Invisible = 3
-    Custom = 4
 
-STATUSES: dict[int, tuple[int, int]] = {
-    Status.Online:    (D_X, 281+D_Y),
-    Status.Away:      (D_X, 253+D_Y),
-    Status.DND:       (D_X, 222+D_Y),
-    Status.Invisible: (D_X, 160+D_Y),
-    Status.Custom:    (D_X, 74+D_Y)
+STATUSES: dict[int, int] = {
+    Status.Online:      0,
+    Status.Away:      -30,
+    Status.DND:       -60,
+    Status.Invisible: -110
 }
 
 CARDS = {
@@ -53,26 +50,43 @@ async def set_status(status):
     initPos = ahk.mouse_position
     initApp = ahk.active_window
 
+    sleep_time = 0.05
+    mouse_speed = 1
+    async def q_move_mouse(x, y, doClick):
+        await asyncio.sleep(sleep_time)
+        ahk.mouse_move(x, dsizy-y, speed=mouse_speed, relative=False, mode='Window', blocking=True)
+        if doClick:
+            ahk.click()
+            await asyncio.sleep(sleep_time)
+
     # go to discord
     discordApp = ahk.find_window(title=dTitle)
     discordApp.activate()
-    await asyncio.sleep(0.1)
+    # await asyncio.sleep(sleep_time)
 
     dposx, dposy, dsizx, dsizy = discordApp.rect
 
-    # change status as appropriate
-    x, y = STATUS_BTN
-    ahk.mouse_move(x, dsizy-y, speed=2, relative=False, mode='Window', blocking=True)
-    await asyncio.sleep(0.1)
-    ahk.click()
-    await asyncio.sleep(0.2)
-    x, y = STATUSES[status]
-    ahk.mouse_move(x, dsizy-y, speed=2, relative=False, mode='Window', blocking=True)
-    await asyncio.sleep(0.2)
-    ahk.click()
+    # change status as appropriate:
+    
+    # profile and presence popup
+    await q_move_mouse(D_X, 24, doClick=True)
+
+    # move to hover over status, showing drop-down menu
+    await q_move_mouse(D_X, 180, doClick=False)
+
+    # move over the statuses to avoid closing the menu
+    # (going diagonally will leave the button rect before entering the menu)
+    if not status == Status.Online:
+        await q_move_mouse(D_X+300, 175, doClick=False)
+
+    # click on the status, which will also close the pop up and drop-down
+    status_y = STATUSES[status]
+    await q_move_mouse(D_X+300, 175+status_y, doClick=True)
+
+    # await asyncio.sleep(2)
 
     #return to the original user state
-    ahk.mouse_move(*initPos, speed=2, relative=False, blocking=True)
+    ahk.mouse_move(*initPos, speed=mouse_speed, relative=False, blocking=True)
     # ahk.mouse_position = initPos
     initApp.activate()
         

@@ -1,1 +1,1 @@
-wt --title "Status Cards" -d C:/Users/dunkyl/source/repos/status-cards/discord-service powershell.exe -NoExit -Command python39 main.py
+wt --title "Status Cards" -d C:/Users/dunkyl/source/repos/status-cards/discord-service pwsh -NoExit -Command python39 main.py
