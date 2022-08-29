@@ -1,4 +1,5 @@
 import asyncio
+from socket import gaierror
 from websockets.exceptions import ConnectionClosedError
 from websockets.client import connect, WebSocketClientProtocol
 from ahk import AHK
@@ -115,6 +116,8 @@ async def main():
             print('disconnected: closed?')
         except ConnectionRefusedError:
             print('disconnected: refused?')
+        except gaierror:
+            print('disconnected: gaierror?')
         await asyncio.sleep(3)
 
 asyncio.run(main())
