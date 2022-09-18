@@ -1,7 +1,7 @@
 import asyncio
 from socket import gaierror
 from websockets.exceptions import ConnectionClosedError
-from websockets.client import connect, WebSocketClientProtocol
+from websockets.client import connect
 from ahk import AHK
 
 ahk = AHK()
@@ -17,10 +17,10 @@ class Status:
     Invisible = 3
 
 STATUSES: dict[int, int] = {
-    Status.Online:      0,
-    Status.Away:      -30,
-    Status.DND:       -60,
-    Status.Invisible: -110
+    Status.Online:     30,
+    Status.Away:       -10,
+    Status.DND:       -50,
+    Status.Invisible: -90
 }
 
 CARDS = {
@@ -73,16 +73,15 @@ async def set_status(status):
     await q_move_mouse(D_X, 24, doClick=True)
 
     # move to hover over status, showing drop-down menu
-    await q_move_mouse(D_X, 180, doClick=False)
+    await q_move_mouse(D_X, 160, doClick=False)
 
     # move over the statuses to avoid closing the menu
     # (going diagonally will leave the button rect before entering the menu)
-    if not status == Status.Online:
-        await q_move_mouse(D_X+300, 175, doClick=False)
+    await q_move_mouse(D_X+300, 160, doClick=False)
 
     # click on the status, which will also close the pop up and drop-down
     status_y = STATUSES[status]
-    await q_move_mouse(D_X+300, 175+status_y, doClick=True)
+    await q_move_mouse(D_X+300, 160+status_y, doClick=True)
 
     # await asyncio.sleep(2)
 

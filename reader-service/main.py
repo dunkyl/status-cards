@@ -8,6 +8,8 @@ from websockets.server import serve as ws_serve, WebSocketServerProtocol
 from functools import partial
 import socket
 
+import datetime
+
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.connect(('8.8.8.8', 1))
 local_ip = s.getsockname()[0]
@@ -16,6 +18,10 @@ pool = ThreadPoolExecutor()
 
 connections: list[WebSocketServerProtocol] = []
 reader_task = None
+
+lights_out_range = (datetime.time(22, 0), datetime.time(6, 0))
+
+tz = datetime.datetime.utcnow().astimezone().tzinfo
 
 class Status:
     Unknown = -1
@@ -60,6 +66,21 @@ async def blink():
     await asyncio.sleep(0.25)
     LEDS['w'].value = 0
 
+async def lights_out_fadeout(led_i: int):
+    await asyncio.sleep(10)
+    for _ in range(10):
+        LEDS_I[led_i].value = 1
+        await asyncio.sleep(1)
+        LEDS_I[led_i].value = 0
+        await asyncio.sleep(1)
+
+async def lights_out_fadein(led_i: int):
+    for _ in range(10):
+        LEDS_I[led_i].value = 0
+        await asyncio.sleep(1)
+        LEDS_I[led_i].value = 1
+        await asyncio.sleep(1)
+
 async def card_read(pn532):
     #status_led.value = 1
     uid = await asyncio.get_event_loop().run_in_executor(pool, partial(pn532.read_passive_target, timeout=0.5))
@@ -67,6 +88,9 @@ async def card_read(pn532):
     return uid
 
 async def card_read_loop():
+    uart = None
+    current_status = None
+    is_night = False
     try:
         while True:
             try:
@@ -85,10 +109,25 @@ async def card_read_loop():
                     status = CARDS.get(uid_str, None)
                     if status is not None:
                         await clear_leds_to(status)
+                        current_status = status
+                        is_night = False # re-do fade after status change if night
                     else:
                         pass
+                    
+                    time_now = datetime.datetime.now(tz).time()
+                    # transition to night
+                    if not is_night and time_now > lights_out_range[0] or time_now < lights_out_range[1]:
+                        is_night = True
+                        await lights_out_fadeout(current_status or 1)
+
+                    # transition to day
+                    if is_night and time_now > lights_out_range[1] and time_now < lights_out_range[0]:
+                        is_night = False
+                        await lights_out_fadein(current_status or 1)
+
             except RuntimeError as e:
-                uart.close()
+                if uart is not None:
+                    uart.close()
                 await asyncio.sleep(1)
                 print(F"Error: {e}")
                 print(traceback.format_exc().replace('\n', '\n     '))
@@ -98,7 +137,8 @@ async def card_read_loop():
         raise e
     finally:
         #pn532.power_down()
-        uart.close()
+        if uart is not None:
+            uart.close()
         
 async def handle_connection(ws: WebSocketServerProtocol, _path: str):
     global reader_task
