@@ -97,6 +97,9 @@ async def card_read(pn532):
 
 async def card_read_loop():
     uart = None
+    global fadeoutTask
+    global is_night
+    global current_status
     
     try:
         while True:
