@@ -91,6 +91,7 @@ async def card_read_loop():
     uart = None
     current_status = None
     is_night = False
+    fadeoutTask = None
     try:
         while True:
             try:
@@ -111,17 +112,23 @@ async def card_read_loop():
                             await clear_leds_to(status)
                             current_status = status
                             is_night = False # re-do fade after status change if night
-                    
+                            if fadeoutTask is not None:
+                                fadeoutTask.cancel()
+
                     time_now = datetime.datetime.now(tz).time()
                     # transition to night
                     if not is_night and time_now > lights_out_range[0] or time_now < lights_out_range[1]:
                         is_night = True
-                        await lights_out_fadeout(current_status or 1)
+                        fadeoutTask = asyncio.create_task(
+                            lights_out_fadeout(current_status or 1)
+                        )
 
                     # transition to day
                     if is_night and time_now > lights_out_range[1] and time_now < lights_out_range[0]:
                         is_night = False
-                        await lights_out_fadein(current_status or 1)
+                        fadeoutTask = asyncio.create_task(
+                            lights_out_fadein(current_status or 1)
+                        )
 
             except RuntimeError as e:
                 if uart is not None:
