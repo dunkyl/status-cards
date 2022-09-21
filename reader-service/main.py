@@ -126,7 +126,7 @@ async def card_read_loop():
                         is_night = True
                         print('is night, queueing fadeout task')
                         fadeoutTask = asyncio.create_task(
-                            lights_out_fadeout(current_status or 1)
+                            lights_out_fadeout(current_status if current_status is not None else 0)
                         )
 
                     # transition to day
@@ -134,7 +134,7 @@ async def card_read_loop():
                         is_night = False
                         print('is day, queueing fadein task')
                         fadeoutTask = asyncio.create_task(
-                            lights_out_fadein(current_status or 1)
+                            lights_out_fadein(current_status if current_status is not None else 0)
                         )
 
             except RuntimeError as e:
