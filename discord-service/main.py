@@ -52,7 +52,7 @@ async def set_status(status):
     initApp = ahk.active_window
 
     sleep_time = 0.05
-    mouse_speed = 1
+    mouse_speed = 2
     async def q_move_mouse(x, y, doClick):
         await asyncio.sleep(sleep_time)
         ahk.mouse_move(x, dsizy-y, speed=mouse_speed, relative=False, mode='Window', blocking=True)

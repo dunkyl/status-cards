@@ -99,20 +99,18 @@ async def card_read_loop():
                 pn532.SAM_configuration()
                 while connections:
                     uid = await card_read(pn532)
-                    if not uid:
-                        continue
-                    uid_str = '-'.join(hex(i)[2:] for i in uid)
-                    print(F"Card: {uid_str}")
-                    for ws in list(connections):
-                        await ws.send(uid_str)
-                    await blink()
-                    status = CARDS.get(uid_str, None)
-                    if status is not None:
-                        await clear_leds_to(status)
-                        current_status = status
-                        is_night = False # re-do fade after status change if night
-                    else:
-                        pass
+                    if uid:
+                        
+                        uid_str = '-'.join(hex(i)[2:] for i in uid)
+                        print(F"Card: {uid_str}")
+                        for ws in list(connections):
+                            await ws.send(uid_str)
+                        await blink()
+                        status = CARDS.get(uid_str, None)
+                        if status is not None:
+                            await clear_leds_to(status)
+                            current_status = status
+                            is_night = False # re-do fade after status change if night
                     
                     time_now = datetime.datetime.now(tz).time()
                     # transition to night
