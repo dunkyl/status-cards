@@ -122,7 +122,7 @@ async def card_read_loop():
 
                     time_now = datetime.datetime.now(tz).time()
                     # transition to night
-                    if not is_night and time_now > lights_out_range[0] or time_now < lights_out_range[1]:
+                    if not is_night and (time_now > lights_out_range[0] or time_now < lights_out_range[1]):
                         is_night = True
                         print('is night, queueing fadeout task')
                         fadeoutTask = asyncio.create_task(
@@ -130,7 +130,7 @@ async def card_read_loop():
                         )
 
                     # transition to day
-                    if is_night and time_now > lights_out_range[1] and time_now < lights_out_range[0]:
+                    if is_night and (time_now > lights_out_range[1] and time_now < lights_out_range[0]):
                         is_night = False
                         print('is day, queueing fadein task')
                         fadeoutTask = asyncio.create_task(
