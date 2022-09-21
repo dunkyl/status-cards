@@ -23,6 +23,10 @@ lights_out_range = (datetime.time(22, 0), datetime.time(6, 0))
 
 tz = datetime.datetime.utcnow().astimezone().tzinfo
 
+current_status = None
+is_night = False
+fadeoutTask = None
+
 class Status:
     Unknown = -1
     Online = 0
@@ -93,9 +97,7 @@ async def card_read(pn532):
 
 async def card_read_loop():
     uart = None
-    current_status = None
-    is_night = False
-    fadeoutTask = None
+    
     try:
         while True:
             try:
