@@ -67,19 +67,23 @@ async def blink():
     LEDS['w'].value = 0
 
 async def lights_out_fadeout(led_i: int):
+    print('starting fade out')
     await asyncio.sleep(10)
     for _ in range(10):
         LEDS_I[led_i].value = 1
         await asyncio.sleep(1)
         LEDS_I[led_i].value = 0
         await asyncio.sleep(1)
+    print('fade out done')
 
 async def lights_out_fadein(led_i: int):
+    print('starting fade in')
     for _ in range(10):
         LEDS_I[led_i].value = 0
         await asyncio.sleep(1)
         LEDS_I[led_i].value = 1
         await asyncio.sleep(1)
+    print('fade in done')
 
 async def card_read(pn532):
     #status_led.value = 1
@@ -113,12 +117,14 @@ async def card_read_loop():
                             current_status = status
                             is_night = False # re-do fade after status change if night
                             if fadeoutTask is not None:
+                                print('canceling fadeout task, new card')
                                 fadeoutTask.cancel()
 
                     time_now = datetime.datetime.now(tz).time()
                     # transition to night
                     if not is_night and time_now > lights_out_range[0] or time_now < lights_out_range[1]:
                         is_night = True
+                        print('is night, queueing fadeout task')
                         fadeoutTask = asyncio.create_task(
                             lights_out_fadeout(current_status or 1)
                         )
@@ -126,6 +132,7 @@ async def card_read_loop():
                     # transition to day
                     if is_night and time_now > lights_out_range[1] and time_now < lights_out_range[0]:
                         is_night = False
+                        print('is day, queueing fadein task')
                         fadeoutTask = asyncio.create_task(
                             lights_out_fadein(current_status or 1)
                         )
