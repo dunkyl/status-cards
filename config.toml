@@ -1,0 +1,18 @@
+[discord_side]
+reader_address = "ws://example.lan:2763"
+
+[reader_side.pins]
+Online = "D6"
+Away = "D17"
+Dnd = "D22"
+Invisible = "D16"
+Custom = "D12"
+# Stream = ""
+
+[cards]
+Online = "8a-f6-3d-98"
+Away = "23-49-81-52"
+Dnd = "3a-ff-3b-98"
+Invisible = "fa-7f-3c-98"
+Custom = "2a-0c-3d-98"
+# Stream = "b3-d4-bc-16"
