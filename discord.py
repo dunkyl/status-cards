@@ -95,17 +95,17 @@ async def set_status(status: str|None):
 
         # change status as appropriate:
         D_X = 95
-        D_Y = 36
+        D_Y = 160
         
         # profile and presence popup
         await q_move_mouse(D_X, 24, doClick=True)
 
         # move to hover over status, showing drop-down menu
-        await q_move_mouse(D_X, 160, doClick=False)
+        await q_move_mouse(D_X, D_Y, doClick=False)
 
         # move over the statuses to avoid closing the menu
         # (going diagonally will leave the button rect before entering the menu)
-        await q_move_mouse(D_X+300, 160, doClick=False)
+        await q_move_mouse(D_X+300, D_Y, doClick=False)
 
         # click on the status, which will also close the pop up and drop-down
         status_y = {
@@ -114,7 +114,7 @@ async def set_status(status: str|None):
             Status.Dnd:       -50,
             Status.Invisible: -90
         }[status]
-        await q_move_mouse(D_X+300, 160+status_y, doClick=True)
+        await q_move_mouse(D_X+300, D_Y+status_y, doClick=True)
 
         # await asyncio.sleep(2)
 
