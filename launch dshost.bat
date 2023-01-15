@@ -1,4 +1,4 @@
-wt new-tab ^
+wt --focus new-tab ^
 --startingDirectory . ^
 --title "Status Cards" ^
 --tabColor "#48B" ^

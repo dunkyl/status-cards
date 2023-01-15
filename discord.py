@@ -38,7 +38,7 @@ class ConnectionLogger:
         print(F"{stamp()} Sleeping")
         self.just_slept = True
 
-    def log_retry_fail(self, exc):
+    def log_connect_fail(self, exc):
         if self.last_retry_exc != exc:
             if self.retry_count > 0:
                 print("") # newline since retry counts are with \r
@@ -141,12 +141,19 @@ async def main():
 
     while True:
         try:
-            ws = await connect(config['discord_side']['reader_address'])
+            try:
+                ws = await connect(config['discord_side']['reader_address'])
+            except ConnectionRefusedError:
+                log.log_connect_fail('refused')
+                continue
+            except gaierror:
+                log.log_connect_fail('no network')
+                continue
             log.log_connected(ws.host)
 
             lastStatus = None
 
-            while not ws.closed:
+            while ws.open:
                 msg: str = await ws.recv() # type: ignore
                 print(F'{stamp()} New card: {msg}')
 
@@ -156,11 +163,10 @@ async def main():
                     await set_status(newstatus)
 
                 lastStatus = newstatus
-        except ConnectionClosedError:  log.log_disconnected('closed')
-        except ConnectionRefusedError: log.log_retry_fail('refused')
-        except gaierror:               log.log_retry_fail('no network')
+        except ConnectionClosedError:
+            log.log_disconnected('closed')
         except Exception as e:
-            log.log_retry_fail(F'other: {e}')
+            log.log_connect_fail(F'other: {e}')
             traceback.print_exc()
         ws = None
         await asyncio.sleep(5)
