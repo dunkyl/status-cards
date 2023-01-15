@@ -131,7 +131,7 @@ def on_sleep():
 
 sleepListen = bedtime.Listener(on_sleep = on_sleep)
 
-from websockets.exceptions import ConnectionClosedError
+from websockets.exceptions import ConnectionClosed
 from socket import gaierror
 from websockets.client import connect
 import traceback
@@ -163,7 +163,7 @@ async def main():
                     await set_status(newstatus)
 
                 lastStatus = newstatus
-        except ConnectionClosedError:
+        except ConnectionClosed:
             log.log_disconnected('closed')
         except Exception as e:
             log.log_connect_fail(F'other: {e}')

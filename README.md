@@ -14,6 +14,7 @@ Recommendations:
  - LEDs to indicate current status
 
 Requirements, Windows PC:
+ - Python 3.11+
  - [Discord app](https://discord.com/download)
  - [AutoHotkey](https://www.autohotkey.com/)
 

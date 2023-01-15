@@ -14,6 +14,9 @@ class DiscordSideConfig(TypedDict):
 
 class ReaderSideConfig(TypedDict):
     pins: dict[str, str] # { status: pin }
+    port: int
+    night_start_hour: int
+    night_end_hour: int
 
 class Config(TypedDict):
     discord_side: DiscordSideConfig
