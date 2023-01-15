@@ -104,7 +104,7 @@ async def card_read_loop():
     try:
         while True:
             try:
-                uart = serial.Serial('/dev/ttyS0', baudrate=115200, timeout=1)
+                uart = serial.Serial('/dev/serial1', baudrate=115200, timeout=1)
                 pn532 = PN532_UART(uart, debug=False)
                 pn532.SAM_configuration()
                 while connections:

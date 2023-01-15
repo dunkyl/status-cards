@@ -1,1 +1,0 @@
-wt --title "Status Cards" -d C:/Users/dunkyl/source/repos/status-cards/discord-service pwsh -NoExit -Command python39 main.py

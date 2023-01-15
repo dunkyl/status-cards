@@ -1,76 +1,57 @@
+'Listens to the reader service and updates the discord status accordingly.'
+from datetime import datetime
 import asyncio
-from socket import gaierror
-from websockets.exceptions import ConnectionClosedError
-from websockets.client import connect
+
 from ahk import AHK
-import time
-import traceback
 import bedtime
-import datetime
 
-ahk = AHK()
+from common import *
 
-D_X = 95
-D_Y = 36
-
-class Status:
-    Unknown = -1
-    Online = 0
-    Away = 1
-    DND = 2
-    Invisible = 3
-
-STATUSES: dict[int, int] = {
-    Status.Online:     30,
-    Status.Away:       -10,
-    Status.DND:       -50,
-    Status.Invisible: -90
-}
-
-CARDS = {
-    '8a-f6-3d-98': Status.Online,
-    '23-49-81-52': Status.Away,
-    '3a-ff-3b-98': Status.DND,
-    'fa-7f-3c-98': Status.Invisible
-}
-
-def stamp():
-    return time.strftime('[%H:%M:%S]', time.localtime())
+def stamp(): return datetime.now().strftime('[%H:%M:%S]')
 
 class ConnectionLogger:
     def __init__(self):
         self.last_retry_exc = None
         self.retry_count = 0
         self.last_connected_time = None
+        self.just_slept = False
+        self.retry_time = 5
 
     def log_connected(self, transport):
         if self.retry_count > 0:
             print("") # newline since retry counts are with \r
         print(F"{stamp()} Connection made: {transport}", end='')
         if self.last_connected_time:
-            elapsed = (datetime.datetime.now() - self.last_connected_time).total_seconds()
+            elapsed = (datetime.now() - self.last_connected_time).total_seconds()
             print(F" (after {elapsed:.0f}s)", end='')
         print("")
         self.last_retry_exc = None
         self.retry_count = 0
-        self.last_connected_time = datetime.datetime.now()
+        self.last_connected_time = datetime.now()
 
-    def log_disconnected(self, exc):
-        print(F"{stamp()} Connection lost: {exc}")
+    def log_disconnected(self, exc: str=""):
+        if not self.just_slept:
+            print(F"{stamp()} Connection lost: {exc}")
+        self.just_slept = False
 
-    def log_retry_fail(self, exc, retry_time):
+    def log_slept(self):
+        print(F"{stamp()} Sleeping")
+        self.just_slept = True
+
+    def log_retry_fail(self, exc):
         if self.last_retry_exc != exc:
             if self.retry_count > 0:
                 print("") # newline since retry counts are with \r
-            print(F"{stamp()} Reconnect failed: {exc} (retry every {retry_time}s)")
+            print(F"{stamp()} Reconnect failed: {exc} (retry every {self.retry_time}s)")
             self.last_retry_exc = exc
             self.retry_count = 0
         else:
             self.retry_count += 1
             print(F"  {self.retry_count} retries failed: {exc}", end='\r')
-            
 
-async def set_status(status):
+ahk = AHK()
+
+async def set_status(status: str|None):
     # find the discord application
     apps = list(ahk.windows())
     dTitle = None
@@ -83,13 +64,15 @@ async def set_status(status):
         print(f'Discord not found, but got state {status} anyway.')
         return
     
-    elif status == Status.Unknown:
+    elif status is None:
         print(f'Not setting unknown status')
         return
 
     # record user state to return to
     initPos = ahk.mouse_position
     initApp = ahk.active_window
+    if initApp is None:
+        raise RuntimeError("Active window not found")
 
     sleep_time = 0.05
     mouse_speed = 2
@@ -111,6 +94,8 @@ async def set_status(status):
         dposx, dposy, dsizx, dsizy = discordApp.rect
 
         # change status as appropriate:
+        D_X = 95
+        D_Y = 36
         
         # profile and presence popup
         await q_move_mouse(D_X, 24, doClick=True)
@@ -123,7 +108,12 @@ async def set_status(status):
         await q_move_mouse(D_X+300, 160, doClick=False)
 
         # click on the status, which will also close the pop up and drop-down
-        status_y = STATUSES[status]
+        status_y = {
+            Status.Online:     30,
+            Status.Away:      -10,
+            Status.Dnd:       -50,
+            Status.Invisible: -90
+        }[status]
         await q_move_mouse(D_X+300, 160+status_y, doClick=True)
 
         # await asyncio.sleep(2)
@@ -132,58 +122,47 @@ async def set_status(status):
         ahk.mouse_move(*initPos, speed=mouse_speed, relative=False, blocking=True)
         # ahk.mouse_position = initPos
         initApp.activate()
-        
-RETRY_TIME = 5
 
 log = ConnectionLogger()
 ws = None
-justSlept = False
 def on_sleep():
-    global justSlept
-    if ws is not None:
-        ws.close()
-    log.log_disconnected("sleeping")
-    justSlept = True
+    if ws is not None: asyncio.run(ws.close())
+    log.log_slept()
 
-sleepListen = bedtime.Listener(
-    on_sleep = on_sleep
-)
+sleepListen = bedtime.Listener(on_sleep = on_sleep)
+
+from websockets.exceptions import ConnectionClosedError
+from socket import gaierror
+from websockets.client import connect
+import traceback
 
 async def main():
-    global justSlept
+    global ws
 
     while True:
         try:
-            ws = await connect('ws://pincoya.lan:10022')
+            ws = await connect(config['discord_side']['reader_address'])
             log.log_connected(ws.host)
 
-            lastStatus = Status.Unknown
+            lastStatus = None
 
             while not ws.closed:
                 msg: str = await ws.recv() # type: ignore
                 print(F'{stamp()} New card: {msg}')
 
-                newstatus = CARDS.get(msg, Status.Unknown)
+                newstatus = card_to_status(msg)
 
                 if newstatus != lastStatus:
                     await set_status(newstatus)
 
                 lastStatus = newstatus
-        except ConnectionClosedError:
-            if not justSlept: # already logged in sleep case
-                log.log_disconnected('closed')
-        except ConnectionRefusedError:
-            log.log_retry_fail('refused', RETRY_TIME)
-        except gaierror:
-            log.log_retry_fail('no network', RETRY_TIME)
+        except ConnectionClosedError:  log.log_disconnected('closed')
+        except ConnectionRefusedError: log.log_retry_fail('refused')
+        except gaierror:               log.log_retry_fail('no network')
         except Exception as e:
-            log.log_retry_fail(F'other: {e}', RETRY_TIME)
+            log.log_retry_fail(F'other: {e}')
             traceback.print_exc()
         ws = None
-        justSlept = False
-        await asyncio.sleep(3)
+        await asyncio.sleep(5)
 
 asyncio.run(main())
-
-
-
