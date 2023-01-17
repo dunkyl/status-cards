@@ -126,7 +126,10 @@ async def set_status(status: str|None):
 log = ConnectionLogger()
 ws = None
 def on_sleep():
-    if ws is not None: asyncio.run(ws.close())
+    global ws
+    if ws is not None:
+        ws.fail_connection(reason="Sleeping")
+        ws = None
     log.log_slept()
 
 sleepListen = bedtime.Listener(on_sleep = on_sleep)
