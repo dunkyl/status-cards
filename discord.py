@@ -9,6 +9,19 @@ from common import *
 
 def stamp(): return datetime.now().strftime('[%H:%M:%S]')
 
+def humanize_time(seconds: float) -> str:
+    s = seconds % 60
+    m = (seconds // 60) % 60
+    h = seconds // 3600
+    text = ""
+    if h > 0:
+        text += F"{h}h "
+    if m > 0:
+        text += F"{m}m "
+    if s > 0 or not text:
+        text += F"{s:.0f}s"
+    return text
+
 class ConnectionLogger:
     def __init__(self):
         self.last_retry_exc = None
@@ -23,18 +36,20 @@ class ConnectionLogger:
         print(F"{stamp()} Connection made: {transport}", end='')
         if self.last_connected_time:
             elapsed = (datetime.now() - self.last_connected_time).total_seconds()
-            print(F" (after {elapsed:.0f}s)", end='')
+            print(F" (after {humanize_time(elapsed)})", end='')
         print("")
         self.last_retry_exc = None
         self.retry_count = 0
+        self.just_slept = False
         self.last_connected_time = datetime.now()
 
     def log_disconnected(self, exc: str=""):
         if not self.just_slept:
+            self.last_connected_time = datetime.now()
             print(F"{stamp()} Connection lost: {exc}")
-        self.just_slept = False
 
     def log_slept(self):
+        self.last_connected_time = datetime.now()
         print(F"{stamp()} Sleeping")
         self.just_slept = True
 
@@ -148,9 +163,11 @@ async def main():
                 ws = await connect(config['discord_side']['reader_address'])
             except ConnectionRefusedError:
                 log.log_connect_fail('refused')
+                await asyncio.sleep(1)
                 continue
             except gaierror:
                 log.log_connect_fail('no network')
+                await asyncio.sleep(1)
                 continue
             log.log_connected(ws.host)
 
@@ -166,7 +183,7 @@ async def main():
                     await set_status(newstatus)
 
                 lastStatus = newstatus
-        except ConnectionClosed:
+        except (ConnectionClosed, TimeoutError):
             log.log_disconnected('closed')
         except Exception as e:
             log.log_connect_fail(F'other: {e}')
