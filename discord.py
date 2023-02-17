@@ -15,11 +15,11 @@ def humanize_time(seconds: float) -> str:
     h = seconds // 3600
     text = ""
     if h > 0:
-        text += F"{h}h "
+        text += F"{h:.0f}h "
     if m > 0:
-        text += F"{m}m "
+        text += F"{m:.0f}m "
     if s > 0 or not text:
-        text += F"{s:.0f}s"
+        text += F"{s:.1f}s"
     return text
 
 class ConnectionLogger:
