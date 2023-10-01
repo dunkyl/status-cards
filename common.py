@@ -23,7 +23,7 @@ class Config(TypedDict):
     reader_side: ReaderSideConfig
     cards: dict[str, str] # { status: card }
 
-config = cast(Config, tomllib.load(open('config.toml', 'rb')))
+config = cast(Config, tomllib.load(open('config.toml', 'r')))
 
 _card_to_status = {card: status for status, card in config['cards'].items() }
 
