@@ -66,7 +66,7 @@ class ConnectionLogger:
 
 ahk = AHK()
 
-async def set_status(status: str|None):
+async def set_status(status: 'str|None'):
     # find the discord application
     apps = list(ahk.windows())
     dTitle = None
@@ -80,7 +80,7 @@ async def set_status(status: str|None):
         return
     
     elif status is None:
-        print(f'Not setting unknown status')
+        print('Not setting unknown status')
         return
 
     # record user state to return to
@@ -101,7 +101,7 @@ async def set_status(status: str|None):
     # go to discord
     discordApp = ahk.find_window(title=dTitle)
     if discordApp is None:
-        print(F"Discord window was not found.")
+        print("Discord window was not found.")
     else:
         discordApp.activate()
         # await asyncio.sleep(sleep_time)
@@ -163,12 +163,12 @@ async def main():
                 ws = await connect(config['discord_side']['reader_address'])
             except ConnectionRefusedError:
                 log.log_connect_fail('refused')
-                await asyncio.sleep(1)
                 continue
             except gaierror:
                 log.log_connect_fail('no network')
-                await asyncio.sleep(1)
                 continue
+            finally:
+                await asyncio.sleep(1)
             log.log_connected(ws.host)
 
             lastStatus = None
@@ -185,6 +185,13 @@ async def main():
                 lastStatus = newstatus
         except (ConnectionClosed, TimeoutError):
             log.log_disconnected('closed')
+        except (OSError) as e:
+            if e.errno == 121:
+                # sometimes thrown when a underlying websocket thread is interrupted by sleep
+                log.log_disconnected('closed')
+            else:
+                log.log_disconnected(F'other: {e}')
+                traceback.print_exc()
         except Exception as e:
             log.log_connect_fail(F'other: {e}')
             traceback.print_exc()

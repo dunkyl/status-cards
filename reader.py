@@ -8,7 +8,7 @@ from websockets.server import serve as ws_serve, WebSocketServerProtocol
 from functools import partial
 # import socket
 
-from ..common import *
+from .common import *
 
 import datetime
 
@@ -69,7 +69,7 @@ current_status = None
 is_night = False
 fadeoutTask = None
 
-async def on_card_read(uid: list[int] | None):
+async def on_card_read(uid: 'list[int] | None'):
     if not uid: return
     global is_night
     global current_status

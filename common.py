@@ -1,5 +1,5 @@
 'Shared types and config between the discord automation and the reader service.'
-import tomllib
+import toml as tomllib
 from typing import TypedDict, cast
 
 class Status:
@@ -27,8 +27,8 @@ config = cast(Config, tomllib.load(open('config.toml', 'rb')))
 
 _card_to_status = {card: status for status, card in config['cards'].items() }
 
-def card_to_status(uid: str) -> str|None:
+def card_to_status(uid: str) -> 'str|None':
     return _card_to_status.get(uid, None)
 
-def status_to_card(status: str) -> str|None:
+def status_to_card(status: str) -> 'str|None':
     return config['cards'].get(status, None)

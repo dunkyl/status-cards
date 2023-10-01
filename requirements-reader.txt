@@ -1,3 +1,4 @@
 websockets
 adafruit-circuitpython-pn532
 pyserial
+toml
