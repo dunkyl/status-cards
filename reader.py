@@ -146,6 +146,7 @@ async def handle_connection(ws: WebSocketServerProtocol, _path: str):
     connections.append(ws)
     await ws.wait_closed()
     connections.remove(ws)
+    print(F'Lost connected client: {ws.remote_address}')
     if not connections:
         print('No more connections: Stopping reading task.')
         reader_task.cancel()
