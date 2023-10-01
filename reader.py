@@ -33,7 +33,7 @@ def digital_out(pin: str, value=False):
     return p
 
 # { status : DigitalInOut pin }
-leds = { k: digital_out(v) for k, v in config['reader_side']['pins'] }
+leds = { k: digital_out(v) for k, v in config['reader_side']['pins'].items() }
 
 async def clear_leds_to(new_status: str):
     for status in config['cards'].values():
