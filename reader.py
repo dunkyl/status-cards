@@ -8,7 +8,7 @@ from websockets.server import serve as ws_serve, WebSocketServerProtocol
 from functools import partial
 # import socket
 
-from .common import *
+from common import *
 
 import datetime
 
