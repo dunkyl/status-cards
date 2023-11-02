@@ -6,8 +6,9 @@ pn532 = PN532_UART(uart, debug=False)
 pn532.SAM_configuration()
 try:
     while True:
-        uid = pn532.read_passive_target()
-        print(uid)
+        if pn532.listen_for_passive_target():
+            uid = pn532.read_passive_target()
+            print(uid)
 finally:
     pn532.power_down()
     uart.close()

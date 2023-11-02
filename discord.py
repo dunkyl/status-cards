@@ -110,7 +110,7 @@ async def set_status(status: 'str|None'):
 
         # change status as appropriate:
         D_X = 95
-        D_Y = 160
+        D_Y = 185
         
         # profile and presence popup
         await q_move_mouse(D_X, 24, doClick=True)
@@ -124,10 +124,10 @@ async def set_status(status: 'str|None'):
 
         # click on the status, which will also close the pop up and drop-down
         status_y = {
-            Status.Online:     30,
-            Status.Away:      -10,
-            Status.Dnd:       -50,
-            Status.Invisible: -90
+            Status.Online:      -5,
+            Status.Away:       -40,
+            Status.Dnd:        -70,
+            Status.Invisible: -110
         }[status]
         await q_move_mouse(D_X+300, D_Y+status_y, doClick=True)
 
