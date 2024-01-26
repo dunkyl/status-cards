@@ -148,7 +148,7 @@ async def handle_connection(ws: WebSocketServerProtocol, _path: str):
     connections.append(ws)
     while not ws.closed:
         try:
-            msg = asyncio.wait_for(ws.recv(), timeout=1)
+            msg = await asyncio.wait_for(ws.recv(), timeout=1)
             if msg == "how":
                 await ws.send("|".join([
                     "ok",
