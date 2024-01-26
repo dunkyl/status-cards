@@ -1,3 +1,4 @@
+from websockets import ConnectionClosed
 import serial, asyncio
 from concurrent.futures import ThreadPoolExecutor
 from adafruit_pn532.uart import PN532_UART
@@ -140,11 +141,24 @@ async def card_read_loop():
         
 async def handle_connection(ws: WebSocketServerProtocol, _path: str):
     global reader_task
+    print(F'New connection: {ws.remote_address}')
     if reader_task is None or reader_task.done():
-        print('New connection: Starting reading task.')
+        print(' ... Starting reading task.')
         reader_task = asyncio.create_task(card_read_loop())
     connections.append(ws)
-    await ws.wait_closed()
+    while not ws.closed:
+        try:
+            msg = asyncio.wait_for(ws.recv(), timeout=1)
+            if msg == "how":
+                await ws.send("|".join([
+                    "ok",
+                    current_status or "Invisible",
+                    str(len(connections))
+                ]))
+        except asyncio.TimeoutError:
+            continue
+        except ConnectionClosed:
+            break
     connections.remove(ws)
     print(F'Lost connected client: {ws.remote_address}')
     if not connections:
